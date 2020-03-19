@@ -28,7 +28,7 @@ class Storage():
         self._reward = np.zeros((num_steps, num_processes, 1))
         self._value = np.zeros((num_steps + 1, num_processes, 1))
         self._logp = np.zeros((num_steps, num_processes, 1))
-        self._subId = torch.zeros((num_steps, num_processes, 1))
+        self._subId = np.zeros((num_steps, num_processes, 1))
 
         self._num_steps, self._step = num_steps, 0
 
@@ -114,15 +114,15 @@ class Storage():
         ret, adv = ret.reshape(-1), adv.reshape(-1)
         subId = self._subId.reshape(-1)
         subpol_counts = []
-        states = actions = logps = rets = advs = subIds = []
+        # states = actions = logps = rets = advs = subIds = []
         for i in range(self._subpolicies_num):
             subpol_counts.append(0)
-            states.append(np.zeros(shape=(self._n*self._step_limit, self._obs_dim)))
-            actions.append(np.zeros(shape=(self._n * self._step_limit, self._action_dim)))
-            logps.append(np.zeros(shape=(self._n * self._step_limit, 1)))
-            rets.append(np.zeros(shape=(self._n * self._step_limit, 1)))
-            advs.append(np.zeros(shape=(self._n * self._step_limit, 1)))
-            subIds.append(np.zeros(shape=(self._n * self._step_limit, 1)))
+        states = np.zeros(shape=(self._subpolicies_num, self._n*self._step_limit, self._obs_dim)))
+        actions.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, self._action_dim)))
+        logps.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
+        rets.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
+        advs.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
+        subIds.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
 
         for i in range(len(subId)):
             x = self._subId[i]
@@ -135,14 +135,24 @@ class Storage():
 
         for i in range(self._subpolicies_num):
             x = self._n*self._step_limit // subpol_counts[i]
+            y = self._n*self._step_limit % subpol_counts[i]
             for j in range(x):
-                states[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = state[i][:subpol_counts[i]]
+                states[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = states[i][:subpol_counts[i]]
                 actions[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = actions[i][:subpol_counts[i]]
                 logps[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = logps[i][:subpol_counts[i]]
                 rets[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = rets[i][:subpol_counts[i]]
                 advs[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = advs[i][:subpol_counts[i]]
                 subIds[i][j*subpol_counts[i]:(j+1)*subpol_counts[i]] = subIds[i][:subpol_counts[i]]
-            
+            states[i][x:] = states[i][:y]
+            actions[i][x:] = actions[i][:y]
+            logps[i][x:] = logps[i][:y]
+            rets[i][x:] = rets[i][:y]
+            advs[i][x:] = advs[i][:y]
+            subIds[i][x:] = subIds[i][:y]
+            # states = np.array(states)
+            # actions = np.array(actions)
+            # logps = np.array(logps)
+            # rets = np.array(rets)
         if self._use_goal:
             goal = self._goal.reshape(-1, self._goal_dim)
 
@@ -152,9 +162,9 @@ class Storage():
             if self._use_goal:
                 yield (state[mb_idx], goal[mb_idx], action[mb_idx],
                        ret[mb_idx], adv[mb_idx], logp[mb_idx])
-            else:
-                yield (state[mb_idx], action[mb_idx], ret[mb_idx], adv[mb_idx],
-                       logp[mb_idx])
+            else: # shape = (subpolicies_num * mini_bs_size)
+                yield (states[:,mb_idx], actions[:,mb_idx], rets[:,mb_idx], advs[:,mb_idx],
+                       logps[:,mb_idx], subIds[:,mb_idx])
 
     def ave_step_reward(self):
         return np.mean(self._reward)
