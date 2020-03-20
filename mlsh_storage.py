@@ -117,12 +117,12 @@ class Storage():
         # states = actions = logps = rets = advs = subIds = []
         for i in range(self._subpolicies_num):
             subpol_counts.append(0)
-        states = np.zeros(shape=(self._subpolicies_num, self._n*self._step_limit, self._obs_dim)))
-        actions.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, self._action_dim)))
-        logps.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
-        rets.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
-        advs.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
-        subIds.np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1)))
+        states = np.zeros(shape=(self._subpolicies_num, self._n*self._step_limit, self._obs_dim))
+        actions = np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, self._action_dim))
+        logps = np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1))
+        rets = np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1))
+        advs = np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1))
+        subIds = np.zeros(shape=(self._subpolicies_num, self._n * self._step_limit, 1))
 
         for i in range(len(subId)):
             x = self._subId[i]
